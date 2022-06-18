@@ -53,7 +53,6 @@ class ChartWindow():
         self.layout = QtWidgets.QVBoxLayout()
         center_widget.setLayout(self.layout)
         self.candlePlot = CandlePlot()
-        
         self.layout.addWidget(self.candlePlot)
 
     def show(self, title, df):
