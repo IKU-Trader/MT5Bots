@@ -4,7 +4,7 @@ Created on Wed Jun 15 20:28:19 2022
 
 @author: oIKUo
 """
-
+import pandas as pd
 import numpy as np
 import datetime
 from datetime import datetime
@@ -72,10 +72,11 @@ class ChartWindow():
 class CandlePlot(PlotWidget):
     def __init__(self):
         super().__init__(name='Candle') #, axisItems=time_axis)
-         
+        self.max_display_bar_size = 100 
+        
     def draw(self, df):
         timestamp = timestampArray(df)
-        time_axis = TimeAxisItem(timestamp=timestamp, form='%m-%d %H:%M', orientation='bottom')
+        time_axis = TimeAxisItem(timestamp=timestamp, form='%y-%m-%d', orientation='bottom')
         self.setAxisItems({'bottom': time_axis})
         op = list(df['Open'].values)
         hi = list(df['High'].values)
@@ -90,7 +91,11 @@ class CandlePlot(PlotWidget):
             candle.draw(i, ohlc, width)
         candle.drawEnd()        
         self.addItem(candle)
-        self.setXRange(0, n) #timestamp[0], timestamp[-1])
+        
+        begin = n - self.max_display_bar_size + 1
+        if begin < 0:
+            begin = 0
+        self.setXRange(begin, n)
         self.setYRange(np.min(np.array(lo)), np.max(np.array(hi)))
         self.setBackground((220, 220, 210))     
                 
@@ -109,15 +114,9 @@ class CandleObject(GraphicsObject):
             color_body = (225, 180, 180)
             color_line = (255, 60, 60)
         self.painter.setPen(mkPen(color_line))
+        self.painter.drawLine(QPointF(i, lo), QPointF(i, hi))
         self.painter.setBrush(mkBrush(color_body))
         self.painter.drawRect(QRectF(i - width / 2, op, width, cl - op))
-        self.painter.setPen(mkPen(color_line))
-        if cl > op:
-            self.painter.drawLine(QPointF(i, cl), QPointF(i, hi))
-            self.painter.drawLine(QPointF(i, op), QPointF(i, lo))
-        else:
-            self.painter.drawLine(QPointF(i, cl), QPointF(i, lo))
-            self.painter.drawLine(QPointF(i, op), QPointF(i, hi))
             
     def drawEnd(self):
         self.painter.end()
@@ -131,9 +130,10 @@ class CandleObject(GraphicsObject):
 def plot():
     app = mkQApp()
     window = ChartWindow('MarketChart')
-    df = fdr.DataReader("AAPL", "2022")
-    window.show('AAPL', df[:100])
-    pyqtgraph.exec()    
+    market = 'AAPL'
+    df = fdr.DataReader(market, '2020')
+    window.show(market, df)
+    pyqtgraph.exec()
     
     
 if __name__ == '__main__':
