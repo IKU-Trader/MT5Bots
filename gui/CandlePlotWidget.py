@@ -44,7 +44,7 @@ class TimeAxisItem(AxisItem):
     
 class CandlePlotWidget(PlotWidget):
     def __init__(self):
-        super().__init__(name='Candle') #, axisItems=time_axis)
+        super().__init__(name='Candle')
         self.max_display_bar_size = 100 
         
     def customize(self):

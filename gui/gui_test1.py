@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_gui.ui'
+# Form implementation generated from reading ui file 'gui_test1.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.0
 #
@@ -24,6 +24,7 @@ class Ui_MainWindow(object):
         self.gridLayoutWidget.setGeometry(QtCore.QRect(0, 0, 1071, 581))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
+        self.gridLayout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
         self.graphicsView_LB = QtWidgets.QGraphicsView(self.gridLayoutWidget)

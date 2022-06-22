@@ -37,6 +37,9 @@
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="sizeConstraint">
+      <enum>QLayout::SetMaximumSize</enum>
+     </property>
      <item row="2" column="0">
       <widget class="QGraphicsView" name="graphicsView_LB"/>
      </item>
