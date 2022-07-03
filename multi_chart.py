@@ -6,9 +6,9 @@ Created on Sun Jun 19 09:38:11 2022
 """
 
 import sys
-from PyQt5 import QtWidgets
 import numpy as np
 import pyqtgraph as pg
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QGraphicsScene, QMainWindow, QSizePolicy
 from CandlePlotWidget import CandlePlotWidget
 import FinanceDataReader as fdr
@@ -23,9 +23,9 @@ def timestampArray(df):
         array.append(index.timestamp())
     return array
 
-class Window(QtWidgets.QMainWindow, Ui_MainWindow):   
+class ChartWindow(QtWidgets.QMainWindow, Ui_MainWindow):   
     def __init__(self):
-        super(Window, self).__init__()
+        super(ChartWindow, self).__init__()
         self.setupUi(self)
         self.market1 = []
         for i in range(4):
@@ -50,6 +50,6 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    window = Window()
+    window = ChartWindow()
     window.show()
     sys.exit(app.exec_())
