@@ -9,20 +9,12 @@ import sys
 from PyQt5 import QtWidgets
 import numpy as np
 import pyqtgraph as pg
-from PyQt5.QtWidgets import QApplication, QGraphicsScene, QMainWindow
+from PyQt5.QtWidgets import QApplication, QGraphicsScene, QMainWindow, QSizePolicy
 from CandlePlotWidget import CandlePlotWidget
 import FinanceDataReader as fdr
 
-'''
-from PyQt5 import uic
-class GraphWindow(QtWidgets.QWidget):   
-    def __init__(self, *args, **kwargs):
-        super(GraphWindow, self).__init__(*args, **kwargs)
-        uic.loadUi('main_ui.ui', self)
-'''
 
-from gui_test1 import Ui_MainWindow
-
+from gui.multi_chart_design import Ui_MainWindow
 
 def timestampArray(df):
     array = []
@@ -35,14 +27,13 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(Window, self).__init__()
         self.setupUi(self)
-        
-        scene = QGraphicsScene()
-        self.graphicsView_LT.setScene(scene)
-        self.candle_plot = CandlePlotWidget()
-        proxy_widget = scene.addWidget(self.candle_plot)
-        
-        self.pushButton.clicked.connect(self.plot)
-
+        self.market1 = []
+        for i in range(4):
+            candle_plot = CandlePlotWidget()
+            self.verticalLayout_market1.addWidget(candle_plot)
+            self.market1.append(candle_plot)
+            
+        self.pushButton_draw.clicked.connect(self.plot)
 
     def plot(self):
         print('clicked')
@@ -53,11 +44,9 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
         h = list(df['High'])
         l = list(df['Low'])
         c = list(df['Close'])    
-        self.candle_plot.setTitle(market)
-        self.candle_plot.draw([t, o, h, l, c])
-        
-        
-
+        for plot in self.market1:      
+            plot.setTitle(market)
+            plot.draw([t, o, h, l, c])
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
