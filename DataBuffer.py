@@ -29,28 +29,12 @@ class DataBuffer:
         return keys, arrays
 
     
-    def arrays(self):
-        return [   self.dic[TIMESTAMP],
-                self.dic[TIMEJST],
-                self.dic[OPEN],
-                self.dic[HIGH],
-                self.dic[LOW],
-                self.dic[CLOSE],
-                self.dic[VOLUME]]
-        
     def update(self, dic):
         if self.dic is None:
             self.dic = dic
             return self.dic
-        
-        arrays = self.arrays()
-        newarrays = [dic[TIMESTAMP],
-                    dic[TIMEJST],
-                    dic[OPEN],
-                    dic[HIGH],
-                    dic[LOW],
-                    dic[CLOSE],
-                    dic[VOLUME]]
+        keys, arrays = self.dicArrays(self.dic)
+        keys, newarrays = self.dicArrays(dic)
         for i, t1 in enumerate(dic[TIMESTAMP]):
             n = len(self.dic[TIMESTAMP])
             for j  in range(n - 1, -1, -1):
