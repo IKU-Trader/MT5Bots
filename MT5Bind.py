@@ -2,6 +2,8 @@
 import pandas as pd
 import MetaTrader5 as mt5
 from datetime import datetime, timedelta, timezone
+import calendar
+import pytz
 
 TIMEZONE_TOKYO = timezone(timedelta(hours=+9), 'Asia/Tokyo')
 
@@ -17,6 +19,12 @@ MINUTE = 'MINUTE'
 HOUR = 'HOUR'
 DAY = 'DAY'
 
+
+
+GEM_FX = ['USDJPY', 'AUDJPY', 'GBPJPY', 'EURJPY', 'EURUSD', 'GBPUSD', 'GBPAUD' ]
+GEM_INDEX = ['DOWUSD', 'NASUSD', 'S&PUSD', 'JPXJPY', 'DAXEUR', 'HSXHKD']
+GEM_COMODITY = ['WTIUSD', 'XAUUSD', 'XAGUSD']
+GEM = GEM_INDEX + GEM_COMODITY + GEM_FX
 
              # symbol : [(mt5 timeframe constants), number, unit]
 TIMEFRAME = {'M1': [mt5.TIMEFRAME_M1,  1, MINUTE],
@@ -50,11 +58,38 @@ def timeframeConstant(symbol):
     except:
         return None
     
-def timestamp2jst(utc):
-    t = datetime.fromtimestamp(utc, TIMEZONE_TOKYO)
+def timestamp2jst(utc_server):
+    t = datetime.fromtimestamp(utc_server, TIMEZONE_TOKYO)
+    if isSummerTime(t):
+        dt = 3
+    else:
+        dt = 4
+    t -= timedelta(hours=dt)
     return t
 
-
+def isSummerTime(date_time):
+    day0 = dayOfLastSunday(date_time.year, 3)
+    tsummer0 = utcTime(date_time.year, 3, day0, 0, 0)
+    day1 = dayOfLastSunday(date_time.year, 10)
+    tsummer1 = utcTime(date_time.year, 10, day1, 0, 0)
+    if date_time > tsummer0 and date_time < tsummer1:
+        return True
+    else:
+        return False
+    
+def utcTime(year, month, day, hour, minute):
+    local = datetime(year, month, day, hour, minute)
+    return pytz.timezone('UTC').localize(local)    
+    
+    
+def dayOfLastSunday(year, month):
+    '''dow: Monday(0) - Sunday(6)'''
+    dow = 6
+    n = calendar.monthrange(year, month)[1]
+    l = range(n - 6, n + 1)
+    w = calendar.weekday(year, month, l[0])
+    w_l = [i % 7 for i in range(w, w + 7)]
+    return l[w_l.index(dow)]    
     
 class MT5Bind:
     def __init__(self, market):
@@ -84,9 +119,9 @@ class MT5Bind:
         ohlc = []
         for d in data:
             values = list(d)
-            timestamp.append(values[0])
-            time = timestamp2jst(values[0])
-            timeJst.append(time)
+            jst = timestamp2jst(values[0])
+            timeJst.append(jst)
+            timestamp.append(jst.timestamp())
             o.append(values[1])
             h.append(values[2])
             l.append(values[3])
@@ -142,4 +177,4 @@ def test(size):
 
     
 if __name__ == "__main__":
-    test(50)
+    test(5)

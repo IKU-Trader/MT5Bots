@@ -21,7 +21,7 @@ from pyqtgraph import PlotWidget, GraphicsObject, mkPen, mkBrush, mkQApp, AxisIt
 from pyqtgraph.Qt.QtWidgets import QGraphicsRectItem
 from pyqtgraph.Qt.QtCore import QPointF, QRectF
 from PyQt5.QtGui import QPicture, QPainter
-
+from DataBuffer import *
 
 class TimeAxisItem(AxisItem):
     def __init__(self, timestamp=None, form='%H:%M', *args, **kwargs):
@@ -45,7 +45,10 @@ class TimeAxisItem(AxisItem):
 class CandlePlotWidget(PlotWidget):
     def __init__(self):
         super().__init__(name='Candle')
-        self.max_display_bar_size = 100 
+        self.max_display_bar_size = 40 
+        self.buffer = DataBuffer()
+        self.last_candle = None
+        self.candle_count = 0
         
     def customize(self):
         xaxis = self.getAxis('bottom')
@@ -58,29 +61,38 @@ class CandlePlotWidget(PlotWidget):
         yaxis.setGrid(32)
         self.setBackground((220, 220, 210))
                 
-    def draw(self, tohlc:list, time_form='%y-%m-%d'):
-        timestamp = tohlc[0]
-        op = tohlc[1]
-        hi = tohlc[2]
-        lo = tohlc[3]
-        cl = tohlc[4]   
+    def update(self, tohlc:dict, time_form='%y-%m-%d'):
+        if self.last_candle is not None:
+            self.removeItem(self.last_candle())
+            self.candle_count -= 1
+        dic = self.buffer.update(tohlc)
+        timestamp = self.buffer.dic[TIMESTAMP] 
         time_axis = TimeAxisItem(timestamp=timestamp, form=time_form, orientation='bottom')
         self.setAxisItems({'bottom': time_axis})
         n = len(timestamp)
         if n < 2:
             return
         width = 2.0 / 3.0
-        candle = CandleObject()
+        
+        op = dic[OPEN]
+        hi = dic[HIGH]
+        lo = dic[LOW]
+        cl = dic[CLOSE]
         for i, ohlc in enumerate(zip(op, hi, lo, cl)):
-            candle.draw(i, ohlc, width)
-        candle.drawEnd()        
-        self.addItem(candle)
+            candle = CandleObject()
+            candle.draw(i + self.candle_count, ohlc, width)     
+            self.addItem(candle)
+        
+        self.candle_count += len(op)
+            
         
         begin = n - self.max_display_bar_size + 1
         if begin < 0:
             begin = 0
+        vmin, vmax = self.buffer.minMax(begin, n - 1)
+        margin = (vmax - vmin) * 0.1
         self.setXRange(begin, n)
-        self.setYRange(np.min(np.array(lo)), np.max(np.array(hi)))
+        self.setYRange(vmin - margin, vmax + margin)
         self.customize()        
                 
 class CandleObject(GraphicsObject):
@@ -101,9 +113,9 @@ class CandleObject(GraphicsObject):
         self.painter.drawLine(QPointF(i, lo), QPointF(i, hi))
         self.painter.setBrush(mkBrush(color_body))
         self.painter.drawRect(QRectF(i - width / 2, op, width, cl - op))
-            
-    def drawEnd(self):
         self.painter.end()
+        
+       
         
     def paint(self, p, *args):
         p.drawPicture(0, 0, self.picture)
