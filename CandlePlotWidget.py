@@ -45,10 +45,12 @@ class TimeAxisItem(AxisItem):
 class CandlePlotWidget(PlotWidget):
     def __init__(self):
         super().__init__(name='Candle')
-        self.max_display_bar_size = 40 
-        self.buffer = DataBuffer()
-        self.last_candle = None
-        self.candle_count = 0
+        self.max_display_bar_size = 40
+        self.candle_objects = []
+        self.clearData()
+        
+    def dataSize(self):
+        return self.buffer.size()
         
     def customize(self):
         xaxis = self.getAxis('bottom')
@@ -61,11 +63,17 @@ class CandlePlotWidget(PlotWidget):
         yaxis.setGrid(32)
         self.setBackground((220, 220, 210))
                 
-    def update(self, tohlc:dict, time_form='%y-%m-%d'):
-        if self.last_candle is not None:
-            self.removeItem(self.last_candle())
-            self.candle_count -= 1
-        dic = self.buffer.update(tohlc)
+    def clearData(self):
+        self.buffer = DataBuffer()
+        self.last_candle = None
+        if len(self.candle_objects) > 0:
+            for item in self.candle_objects:
+                self.removeItem(item)
+        self.candle_objects = []
+        self.display_range = None
+        
+    def update(self, tohlc:dict, time_form='%m-%d'):
+        begin, end = self.buffer.update(tohlc)
         timestamp = self.buffer.dic[TIMESTAMP] 
         time_axis = TimeAxisItem(timestamp=timestamp, form=time_form, orientation='bottom')
         self.setAxisItems({'bottom': time_axis})
@@ -74,26 +82,35 @@ class CandlePlotWidget(PlotWidget):
             return
         width = 2.0 / 3.0
         
-        op = dic[OPEN]
-        hi = dic[HIGH]
-        lo = dic[LOW]
-        cl = dic[CLOSE]
-        for i, ohlc in enumerate(zip(op, hi, lo, cl)):
+        op = self.buffer.dic[OPEN]
+        hi = self.buffer.dic[HIGH]
+        lo = self.buffer.dic[LOW]
+        cl = self.buffer.dic[CLOSE]
+        for i in range(begin, end + 1):
             candle = CandleObject()
-            candle.draw(i + self.candle_count, ohlc, width)     
+            ohlc = [op[i], hi[i], lo[i], cl[i]]
+            candle.draw(i, ohlc, width)     
             self.addItem(candle)
-        
-        self.candle_count += len(op)
-            
-        
+            self.candle_objects.append(candle)
+    
         begin = n - self.max_display_bar_size + 1
         if begin < 0:
             begin = 0
         vmin, vmax = self.buffer.minMax(begin, n - 1)
         margin = (vmax - vmin) * 0.1
-        self.setXRange(begin, n)
-        self.setYRange(vmin - margin, vmax + margin)
-        self.customize()        
+        xrange = (begin, n)
+        yrange = (vmin - margin, vmax + margin)
+        self.setXRange(xrange[0], xrange[1])
+        self.setYRange(yrange[0], yrange[1])
+        self.display_range = (xrange, yrange)
+        self.customize()
+        
+    def removeLast(self):
+        n = len(self.candle_objects)
+        if n > 0:
+            item = self.candle_objects.pop()
+            self.removeItem(item)
+            self.buffer.dic = DataBuffer.deleteLast(self.buffer.dic)
                 
 class CandleObject(GraphicsObject):
     def __init__(self):

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+from datetime import datetime, timedelta, timezone
+import calendar
+import pytz
 from MT5Bind import *
 
 class DataBuffer:
@@ -21,6 +24,17 @@ class DataBuffer:
         return (split1, split2)
     
     @classmethod
+    def deleteLast(cls, dic):
+        keys = dic.keys()
+        arrays = []
+        for key in keys:
+            arrays.append(dic[key])
+        out = {}
+        for key, array in zip(keys, arrays):
+            out[key] = array[:-1]
+        return out        
+        
+    @classmethod
     def sliceDic(cls, dic, begin, end):
         keys = dic.keys()
         arrays = []
@@ -32,7 +46,7 @@ class DataBuffer:
         return out
         
     @classmethod
-    def dicArrays(cls, dic):
+    def dic2Arrays(cls, dic):
         keys = dic.keys()
         arrays = []
         for key in keys:
@@ -80,37 +94,26 @@ class DataBuffer:
     def update(self, dic):
         if self.dic is None:
             self.dic = dic
-            return self.dic
-        keys, arrays = self.dicArrays(self.dic)
-        keys, newarrays = self.dicArrays(dic)
+            return (0, len(dic[TIMESTAMP]) - 1)
+        keys, arrays = self.dic2Arrays(self.dic)
+        keys, newarrays = self.dic2Arrays(dic)        
+        last_time = self.dic[TIMESTAMP][-1]
         indices = []
-        for i, t1 in enumerate(dic[TIMESTAMP]):
-            n = len(self.dic[TIMESTAMP])
-            for j  in range(n - 1, -1, -1):
-                t0 = self.dic[TIMESTAMP][j]
-                if t1 > t0:
-                    for array, newarray in zip(arrays, newarrays):
-                        array.insert(j + 1, newarray[i])
-                        indices.append(i)
-                    break
-                #elif t1 == t0:
-                #    for array, newarray in zip(arrays, newarrays):
-                #        del array[j]
-                #        array.insert(j, newarray[i])
-                #    break
-        
-        dic = {}
-        for key, array in zip(keys, newarrays):
-            a = []
-            for i in indices:
-                a.append(array[i])
-            dic[key] = a
-        return dic
+        for i  in range(len(dic[TIMESTAMP])):
+            t = dic[TIMESTAMP][i]
+            if t > last_time:
+                indices.append(i)
+                last_time = t
+                for array, newarray in zip(arrays, newarrays):
+                    array.append(newarray[i])
+        n = len(self.dic[TIMESTAMP])
+        m = len(indices)
+        return (n - m, n - 1)
                    
 def save(dic, filepath):
     keys = dic.keys()
     data = []
-    keys, arrays = DataBuffer.dicArrays(dic)
+    keys, arrays = DataBuffer.dic2Arrays(dic)
     n = len(arrays[0])
     for i in range(n):
         d = []

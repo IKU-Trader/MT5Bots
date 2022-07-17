@@ -19,6 +19,7 @@ TIMEFRAME = {'S1':  [1,  1, SECOND],
              'H8':  [11, 8, HOUR],
              'D1':  [12, 1, DAY]}
 
+
 class Timeframe:
     def __init__(self, symbol):
         self.symbol = symbol.upper()
