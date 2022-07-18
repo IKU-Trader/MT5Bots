@@ -5,8 +5,10 @@ Created on Mon Jul 11 10:37:24 2022
 @author: docs9
 """
 
-
+import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+
 import numpy as np
 import time
 import threading
@@ -20,7 +22,7 @@ from CandlePlotWidget import CandlePlotWidget
 from MT5Bind import *
 from DataBuffer import *
 
-from gui.chart_design import Ui_MainWindow
+from chart_design import Ui_MainWindow
 
 
 SETTING_FILE = './settig.json'
