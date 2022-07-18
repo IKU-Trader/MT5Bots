@@ -123,8 +123,6 @@ def save(dic, filepath):
     df = pd.DataFrame(data=data, columns=keys)
     df.to_csv(filepath, index=False)
     
-
-    
 def test():
     server = MT5Bind('DOWUSD')
     ohlc, ohlcv, dic =  server.download('M5', size=10)
@@ -136,12 +134,9 @@ def test():
     buffer = DataBuffer()
     result1 = buffer.update(dic)    
     result2 = buffer.update(dic2)
-    
-    
+
     save(dic, './original.csv')
     save(result2, './buffered.csv')
-    
-
 
 if __name__ == '__main__':
     test()
