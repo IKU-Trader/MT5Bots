@@ -13,7 +13,7 @@ from MT5Bind import *
 
 from Timeframe import Timeframe
 from DataBuffer import DataBuffer
-from pandas_utility import dic2df
+from utility import dic2df
 from Mt5DataServer import Mt5DataServer
 
 INITIAL_DATA_SIZE = 50000
@@ -23,6 +23,7 @@ class TradeApp:
     def __init__(self, market, timeframe_symbol):
         self.market = market
         self.timeframe = Timeframe(timeframe_symbol)
+        self.buffer = DataBuffer()
         self.loadInitialData()
         pass
     
@@ -31,11 +32,9 @@ class TradeApp:
         self.stub = Mt5DataServer(self.market, self.timeframe)
         self.stub.loadFromCsv('./data/dowusd_m5.csv')
         n = self.stub.length
-        self.current = int(n / 2)
-        dic = self.stub.sliceData(0, self.current)
-        
-        
-        
+        self.current_index = int(n / 2)
+        dic = self.stub.sliceData(0, self.current_index)
+        self.buffer.loadData(dic)
         pass
     
     

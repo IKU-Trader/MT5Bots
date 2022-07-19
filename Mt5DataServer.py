@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), './'))
 
 import pandas as pd
 from datetime import datetime
-from pandas_utility import df2dic
+from utility import df2dic
 
 from const import *
 

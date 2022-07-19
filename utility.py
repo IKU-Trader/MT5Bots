@@ -47,4 +47,45 @@ def dic2df(dic):
     return df
 
     
+def splitDic(dic, i):
+    keys = dic.keys()
+    arrays = []
+    for key in keys:
+        arrays.append(dic[key])
+    split1 = {}
+    split2 = {}
+    for key, array in zip(keys, arrays):
+        split1[key] = array[:i]
+        split2[key] = array[i:]
+    return (split1, split2)
+    
+    
+def deleteLast(dic):
+    keys = dic.keys()
+    arrays = []
+    for key in keys:
+        arrays.append(dic[key])
+    out = {}
+    for key, array in zip(keys, arrays):
+        out[key] = array[:-1]
+    return out        
+        
+
+def sliceDic(dic, begin, end):
+    keys = dic.keys()
+    arrays = []
+    for key in keys:
+        arrays.append(dic[key])
+    out = {}
+    for key, array in zip(keys, arrays):
+        out[key] = array[begin: end + 1]
+    return out
+        
+def dic2Arrays(dic):
+    keys = dic.keys()
+    arrays = []
+    for key in keys:
+        arrays.append(dic[key])
+    return keys, arrays
+
     

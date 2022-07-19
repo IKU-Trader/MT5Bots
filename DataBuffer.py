@@ -10,48 +10,7 @@ class DataBuffer:
     def __init__(self):
         self.dic = None
         
-    @classmethod
-    def splitDic(cls, dic, i):
-        keys = dic.keys()
-        arrays = []
-        for key in keys:
-            arrays.append(dic[key])
-        split1 = {}
-        split2 = {}
-        for key, array in zip(keys, arrays):
-            split1[key] = array[:i]
-            split2[key] = array[i:]
-        return (split1, split2)
-    
-    @classmethod
-    def deleteLast(cls, dic):
-        keys = dic.keys()
-        arrays = []
-        for key in keys:
-            arrays.append(dic[key])
-        out = {}
-        for key, array in zip(keys, arrays):
-            out[key] = array[:-1]
-        return out        
-        
-    @classmethod
-    def sliceDic(cls, dic, begin, end):
-        keys = dic.keys()
-        arrays = []
-        for key in keys:
-            arrays.append(dic[key])
-        out = {}
-        for key, array in zip(keys, arrays):
-            out[key] = array[begin: end + 1]
-        return out
-        
-    @classmethod
-    def dic2Arrays(cls, dic):
-        keys = dic.keys()
-        arrays = []
-        for key in keys:
-            arrays.append(dic[key])
-        return keys, arrays
+
 
     def slicedData(self, begin, end):
         return self.sliceDic(self.dic, begin, end)
@@ -91,10 +50,11 @@ class DataBuffer:
         n = int(n + 0.5) +1
         return n
     
+    def loadData(self, dic):
+        self.dic = dic
+        return   
+    
     def update(self, dic):
-        if self.dic is None:
-            self.dic = dic
-            return (0, len(dic[TIMESTAMP]) - 1)
         keys, arrays = self.dic2Arrays(self.dic)
         keys, newarrays = self.dic2Arrays(dic)        
         last_time = self.dic[TIMESTAMP][-1]
