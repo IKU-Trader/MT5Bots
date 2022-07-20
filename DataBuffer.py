@@ -5,15 +5,16 @@ from datetime import datetime, timedelta, timezone
 import calendar
 import pytz
 from MT5Bind import *
+from TechnicalAnalysis import atr
+from utility import dic2Arrays, sliceDic
 
 class DataBuffer:
-    def __init__(self):
+    def __init__(self, param):
+        self.param = param
         self.dic = None
         
-
-
     def slicedData(self, begin, end):
-        return self.sliceDic(self.dic, begin, end)
+        return sliceDic(self.dic, begin, end)
     
     def minMax(self, begin, end):
         dic = self.slicedData(begin, end)
@@ -51,12 +52,23 @@ class DataBuffer:
         return n
     
     def loadData(self, dic):
+        atr_data, tr_data= atr(dic[HIGH], dic[LOW], dic[CLOSE], self.param.atr_window)
+        dic[ATR] = atr_data
+        dic[TR] = tr_data
         self.dic = dic
         return   
     
+    def deleteLastData(self, dic):
+        keys, arrays = dic2Arrays(dic)
+        out = {}
+        for key, array in zip(keys, arrays):
+            out[key] = array[:-1]
+        return out
+    
     def update(self, dic):
-        keys, arrays = self.dic2Arrays(self.dic)
-        keys, newarrays = self.dic2Arrays(dic)        
+        self.dic = self.deleteLastData(self.dic)
+        keys, arrays = dic2Arrays(self.dic)
+        keys, newarrays = dic2Arrays(dic)        
         last_time = self.dic[TIMESTAMP][-1]
         indices = []
         for i  in range(len(dic[TIMESTAMP])):
@@ -68,8 +80,23 @@ class DataBuffer:
                     array.append(newarray[i])
         n = len(self.dic[TIMESTAMP])
         m = len(indices)
-        return (n - m, n - 1)
-                   
+        begin = n - m
+        end = n -1
+        self.updateAtr(self.dic, begin, end)
+        return (begin, end)
+            
+    def updateAtr(self, dic, begin, end):
+        n = len(dic[HIGH])
+        sliced = sliceDic(dic, begin - self.param.atr_window, end)
+        (atrdata, trdata) = atr(sliced[HIGH], sliced[LOW], sliced[CLOSE], self.param.atr_window)
+        atrarray = self.dic[ATR]
+        trarray = self.dic[TR]
+        index = -1
+        for i in range(end , begin -1, -1):
+            atrarray[i] = atrdata[index]
+            trarray[i] = trdata[index]
+            index -= 1
+
 def save(dic, filepath):
     keys = dic.keys()
     data = []

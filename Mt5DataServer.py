@@ -50,7 +50,7 @@ class Mt5DataServer:
         self.length = len(df)
         jst = string2pydatetime(df[TIMEJST].values)
         df1 = df[[TIMESTAMP, OPEN, HIGH, LOW, CLOSE, VOLUME]]
-        data = df2dic(df1)
+        data = df2dic(df1, is_numpy=False)
         data[TIMEJST] = jst
         self.length = len(jst)
         self.data = data
@@ -59,7 +59,7 @@ class Mt5DataServer:
     def sliceData(self, begin, end):
         out = {}
         for key, value in self.data.items():
-            out[key] = value[begin:end]
+            out[key] = value[begin:end + 1]
         return out
 
     # rng: (begin, end)

@@ -36,3 +36,7 @@ TIMEFRAME = {'M1': [mt5.TIMEFRAME_M1,  1, MINUTE],
              'H4': [mt5.TIMEFRAME_H4,    4, HOUR],
              'H8': [mt5.TIMEFRAME_H8,    8, HOUR],
              'D1': [mt5.TIMEFRAME_D1,    1, DAY]}
+
+ATR = 'atr'
+TR = 'tr'
+SMA = 'sma'
