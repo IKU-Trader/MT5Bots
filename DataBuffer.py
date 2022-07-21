@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 import calendar
 import pytz
 from MT5Bind import *
-from TechnicalAnalysis import atr
+from TechnicalAnalysis import Indicator, Math
 from utility import dic2Arrays, sliceDic
 
 class DataBuffer:
@@ -52,7 +52,7 @@ class DataBuffer:
         return n
     
     def loadData(self, dic):
-        atr_data, tr_data= atr(dic[HIGH], dic[LOW], dic[CLOSE], self.param.atr_window)
+        atr_data, tr_data= Indicator.atr(dic[HIGH], dic[LOW], dic[CLOSE], self.param.atr_window)
         dic[ATR] = atr_data
         dic[TR] = tr_data
         self.dic = dic
@@ -88,7 +88,7 @@ class DataBuffer:
     def updateAtr(self, dic, begin, end):
         n = len(dic[HIGH])
         sliced = sliceDic(dic, begin - self.param.atr_window, end)
-        (atrdata, trdata) = atr(sliced[HIGH], sliced[LOW], sliced[CLOSE], self.param.atr_window)
+        (atrdata, trdata) = Indicator.atr(sliced[HIGH], sliced[LOW], sliced[CLOSE], self.param.atr_window)
         atrarray = self.dic[ATR]
         trarray = self.dic[TR]
         index = -1

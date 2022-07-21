@@ -6,9 +6,6 @@ import calendar
 import pytz
 from const import *
 
-TIMEZONE_TOKYO = timezone(timedelta(hours=+9), 'Asia/Tokyo')
-
-
 
 def timeframeUnit(symbol):
     try:

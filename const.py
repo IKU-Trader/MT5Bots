@@ -5,6 +5,9 @@ Created on Sun Jan 16 09:49:46 2022
 @author: docs9
 """
 
+from datetime import datetime, timedelta, timezone
+import calendar
+import pytz
 import MetaTrader5 as mt5
 
 TIMEJST = 'timejst'
@@ -19,7 +22,7 @@ MINUTE = 'MINUTE'
 HOUR = 'HOUR'
 DAY = 'DAY'
 
-
+TIMEZONE_TOKYO = timezone(timedelta(hours=+9), 'Asia/Tokyo')
 
 GEM_FX = ['USDJPY', 'AUDJPY', 'GBPJPY', 'EURJPY', 'EURUSD', 'GBPUSD', 'GBPAUD' ]
 GEM_INDEX = ['DOWUSD', 'NASUSD', 'S&PUSD', 'JPXJPY', 'DAXEUR', 'HSXHKD']
@@ -40,3 +43,5 @@ TIMEFRAME = {'M1': [mt5.TIMEFRAME_M1,  1, MINUTE],
 ATR = 'atr'
 TR = 'tr'
 SMA = 'sma'
+ATR_BAND_UPPER = 'atr_upper'
+ATR_BAND_LOWER = 'atr_lower'

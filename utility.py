@@ -88,4 +88,25 @@ def dic2Arrays(dic):
         arrays.append(dic[key])
     return keys, arrays
 
+def sliceTime(pytime_array: list, time_from, time_to):
+    begin = None
+    end = None
+    for i in range(len(pytime_array)):
+        t = pytime_array[i]
+        if begin is None:
+            if t >= time_from:
+                begin = i
+        else:
+            if t > time_to:
+                end = i
+                return (end - begin + 1, begin, end)
+    if begin is not None:
+        end = len(pytime_array) - 1
+        return (end - begin + 1, begin, end)
+    else:
+        return (0, None, None)
+    
+    
+    
+
     
