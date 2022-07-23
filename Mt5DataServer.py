@@ -10,8 +10,8 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), './'))
 
 import pandas as pd
-from datetime import datetime
-from utility import df2dic
+from datetime import datetime, timezone
+from utility import df2dic, jst2timestamp
 
 from const import *
 
@@ -31,7 +31,8 @@ def datetime64pydatetime(array):
 def string2pydatetime(array:list, form='%Y-%m-%d %H:%M:%S%z', localize=True):
     out = []
     for s in array:
-        t = datetime.strptime(s, form)
+        values = s.split('+')
+        t = datetime.strptime(values[0], form)
         if localize:
             t = t.astimezone()
         out.append(t)
@@ -45,9 +46,28 @@ class Mt5DataServer:
         self.timeframe = timeframe
         
     
-    def loadFromCsv(self, filepath):
+    def loadFromCsv(self, filepath, kind):
+        if kind.lower() == 'mt5':
+            self.loadMt5Csv(filepath)
+        elif kind.lower() == 'tradingview':
+            self.loadTradingviewCsv(filepath)
+        
+        
+    def loadTradingviewCsv(self, filepath):
         df = pd.read_csv(filepath)
-        self.length = len(df)
+        df = df.rename(columns={'time': TIMEJST})
+        #print(df.head())
+        jst = string2pydatetime(df[TIMEJST].values, form='%Y-%m-%dT%H:%M:%S')
+        df[TIMESTAMP] = jst2timestamp(jst)
+        df1 = df[[TIMESTAMP, OPEN, HIGH, LOW, CLOSE]]
+        data = df2dic(df1, is_numpy=False)
+        data[TIMEJST] = jst
+        self.length = len(jst)
+        self.data = data            
+            
+            
+    def loadMt5Csv(self, filepath):
+        df = pd.read_csv(filepath)
         jst = string2pydatetime(df[TIMEJST].values)
         df1 = df[[TIMESTAMP, OPEN, HIGH, LOW, CLOSE, VOLUME]]
         data = df2dic(df1, is_numpy=False)

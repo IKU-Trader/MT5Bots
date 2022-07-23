@@ -43,5 +43,6 @@ TIMEFRAME = {'M1': [mt5.TIMEFRAME_M1,  1, MINUTE],
 ATR = 'atr'
 TR = 'tr'
 SMA = 'sma'
+HL2 = 'hl2'
 ATR_BAND_UPPER = 'atr_upper'
 ATR_BAND_LOWER = 'atr_lower'

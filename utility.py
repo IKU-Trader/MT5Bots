@@ -7,6 +7,7 @@ Created on Sat Jan 22 20:24:47 2022
 
 import pandas as pd
 import numpy as np
+from datetime import datetime, timezone
 
 def df2dic(df: pd.DataFrame, is_numpy=True, time_key = 'time', convert_keys=None):
     columns = df.columns
@@ -106,6 +107,18 @@ def sliceTime(pytime_array: list, time_from, time_to):
     else:
         return (0, None, None)
     
+    
+def jst2timestamp(jst):
+    timestamp = []
+    for t in jst:
+        timestamp.append(t.timestamp())
+    return timestamp
+    
+def jst2utc(jst):
+    utc = []
+    for t in jst:
+        utc.append(t.astimezone(timezone.utc))
+    return utc
     
     
 

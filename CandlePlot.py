@@ -156,7 +156,7 @@ class BoxGraphic:
 
     
 class CandlePlot:
-    def __init__(self, fig, ax, title, date_format=DATE_FORMAT_DAY_TIME):
+    def __init__(self, fig, ax, title, date_format=DATE_FORMAT_TIME):
         self.fig = fig
         self.ax = ax
         self.title = title
@@ -274,6 +274,12 @@ class CandlePlot:
         self.ax.grid()
         return
     
+    def drawMarkers(self, time, ref, offset, signal, value, marker, color, markersize=10):
+        for t, r, s in zip(time, ref, signal):
+            if s == value:
+                self.drawMarker(t, r + offset, marker, color, markersize=markersize)
+        
+        
     def drawMarker(self, time, value, marker, color, markersize=10):
         t = awarePyTime2Float(time)
         self.ax.plot(t, value, marker=marker, color=color, markersize=markersize)

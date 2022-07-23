@@ -23,17 +23,17 @@ class Indicator:
         out = nans(n)
         for i in range(window - 1, n):
             s = 0.0
-            count = False
+            count = 0
             for j in range(window):
                 a = array[i - j]
                 if np.isnan(a):
-                    break
+                    continue
                 else:
                     count += 1
                     s += a
             if count > 0:                
                 out[i] = s / count
-                return out            
+        return out            
 
     @classmethod            
     def tr(cls, high, low, close):
@@ -54,14 +54,51 @@ class Indicator:
         return (out, trdata)
     
     @classmethod
-    def atrBand(cls, atr, close, window, k):
-        upper = np.array(close) + k * np.array(atr) 
-        lower = np.array(close) - k * np.array(atr)
-        return (list(upper), list(lower))
+    def atrBand(cls, atr, close, k):
+        upper = Math.addArray(close, Math.multiply(atr, k))
+        lower = Math.subtractArray(close, Math.multiply(atr, k))
+        return (upper, lower)
+    
+    
+    @classmethod 
+    def hl2(cls, high, low):
+        out = Math.addArray(high, low)
+        out = Math.multiply(out, 0.5)
+        return out
 
-
- 
 class Math:
+    
+    @classmethod
+    def addArray(cls, array1: list, array2: list) ->list:
+        out = []
+        for a1, a2 in zip(array1, array2):
+            if np.isnan(a1) or np.isnan(a2):
+                out.append(np.nan)
+            else:
+                out.append(a1 + a2)
+        return out
+    
+    @classmethod
+    def subtractArray(cls, array1: list, array2: list) ->list:
+        out = []
+        for a1, a2 in zip(array1, array2):
+            if np.isnan(a1) or np.isnan(a2):
+                out.append(np.nan)
+            else:
+                out.append(a1 - a2)
+        return out
+        
+    @classmethod
+    def multiply(cls, array: list, value: float) ->list:
+        out = []
+        for a in array:
+            if np.isnan(a) :
+                out.append(np.nan)
+            else:
+                out.append(value * a)
+        return out   
+        
+        
     @classmethod
     def greater(cls, ref:list, array:list) -> list:
         out = []
@@ -69,7 +106,7 @@ class Math:
             if np.isnan(r) or np.isnan(a):
                 out.append(0)
             else:
-                if r > a:
+                if r < a:
                     out.append(1)
                 else:
                     out.append(0)
@@ -82,7 +119,7 @@ class Math:
             if np.isnan(r) or np.isnan(a):
                 out.append(0)
             else:
-                if r >= a:
+                if r <= a:
                     out.append(1)
                 else:
                     out.append(0)
@@ -95,7 +132,7 @@ class Math:
             if np.isnan(r) or np.isnan(a):
                 out.append(0)
             else:
-                if r < a:
+                if r > a:
                     out.append(1)
                 else:
                     out.append(0)
@@ -108,7 +145,7 @@ class Math:
             if np.isnan(r) or np.isnan(a):
                 out.append(0)
             else:
-                if r < a:
+                if r >= a:
                     out.append(1)
                 else:
                     out.append(0)
@@ -141,16 +178,32 @@ class Math:
                     elif s > 0:
                         sell[i] = 0
                         
-class Signal:    
-    @classmethod
-    def atrBreak(cls, dic, param, is_multi_position=True):
+class AtrBreak:    
+    
+    def __init__(self, atr_window:int, k:float, band_input:str, break_input:str):
+        self.atr_window = atr_window
+        self.band_input = band_input
+        self.break_input = break_input
+        self.k = k
+        
+    def calc(self, dic, is_multi_position=True):
         atr_ = dic[ATR]
+        high = dic[HIGH]
+        low = dic[LOW]
         close = dic[CLOSE]
-        upper, lower = Indicator.atrBand(atr_, close, param.atr_window, param.atr_band_k)
+        hl2 = Indicator.hl2(high, low)
+        dic[HL2] = hl2
+        inp = dic[self.band_input]
+        upper, lower = Indicator.atrBand(atr_, inp, self.k)
+        
+        
         dic[ATR_BAND_UPPER] = upper
         dic[ATR_BAND_LOWER] = lower
-        buy_signal = Math.greater(upper, close)
-        sell_signal = Math.smaller(lower, close)
+        inp2 = dic[self.break_input]
+        buy_signal = Math.greater(upper, inp2)
+        sell_signal = Math.smaller(lower, inp2)
         if is_multi_position == False:
             Math.forceSinglePosition(buy_signal, sell_signal)
         return (buy_signal, sell_signal)
+    
+    
